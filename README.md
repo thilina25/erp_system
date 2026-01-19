@@ -152,8 +152,6 @@ Test cases include:
 
 ---
 
-## 🚀 Why This Project is Enterprise-Grade
-
 This project follows real enterprise design patterns:
 
 ✔ Separation of concerns
@@ -163,17 +161,6 @@ This project follows real enterprise design patterns:
 ✔ Data integrity via transactions
 ✔ Scalable API design
 ✔ Modular architecture
-
----
-
-## 📈 Future Enhancements
-
-* Frontend dashboard (React / Angular)
-* Invoice PDF generation
-* Email notifications
-* Docker support
-* Cloud deployment
-* Microservices conversion
 
 ---
 
