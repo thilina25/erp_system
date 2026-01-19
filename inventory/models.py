@@ -24,5 +24,5 @@ class Product(models.Model):
     recoder_level = models.IntegerField()
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     
-    def __str__(self):
-        return self.name
+    def is_low_stock(self):
+        return self.quantity <= self.recoder_level

@@ -57,6 +57,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             
             serializer = self.get_serializer(order)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
