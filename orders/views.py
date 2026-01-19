@@ -67,3 +67,18 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
     permission_classes = [IsAuthenticated]
+    
+@action(detail=True, methods=['post'])
+def update_status(self, request, pk=None):
+    order = self.get_object()
+    new_status = request.data.get("status")
+
+    valid_statuses = ['PENDING', 'APPROVED', 'SHIPPED', 'COMPLETED', 'CANCELLED']
+
+    if new_status not in valid_statuses:
+        return Response({"error": "Invalid status"}, status=400)
+
+    order.status = new_status
+    order.save()
+
+    return Response({"message": "Status updated"})
