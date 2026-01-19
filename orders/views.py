@@ -12,8 +12,7 @@ from django.utils.timezone import now
 from datetime import timedelta
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
-
+from .models import OrderItem
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -64,6 +63,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(order)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
+    #Total Sales & Order Count
     @action(detail=False, methods=['get'])
     def dashboard_summery(self, request):
         total_orders = Order.objects.count()
@@ -73,6 +73,57 @@ class OrderViewSet(viewsets.ModelViewSet):
             "total_orders": total_orders,
             "total_revenue": total_revenue
         })
+        
+    #Orders Per Day (Last 7 Days)
+    @action(detail=False, methods=['get'])
+    def orders_last_7_days(self, request):
+        last_7_days = now() - timedelta(days=7)
+        
+        data = (
+            Order.objects
+            .filter(date__gte=last_7_days)
+            .extra(select={'day': 'date(date)'})
+            .values('day')
+            .annotate(count=Count('id'))
+            .order_by('day')
+        )
+        
+        return Response(data)
+    
+    #Best-Selling Products
+    @action(detail=False, methods=['get'])
+    def best_selling_products(self, request):
+        data = (
+            OrderItem.objects
+            .values('product__name')
+            .annotate(total_sold=Sum('quantity'))
+            .order_by('-total_sold')[:5]
+        )
+        
+        return Response(data)
+    
+    #Monthly Revenue
+    @action(detail=False, methods=['get'])
+    def monthly_revenue(self, request):
+        data = (
+            Order.objects
+            .extra(select={'month': "strftime('%%m', date)"})
+            .value('month')
+            .annotate(revenue=Sum('total_amount'))
+            .order_by('month')
+        )
+        
+    #Low Stock Summery
+    @action(detail=False, methods=['get'])
+    def stock_summery(self, request):
+        total_products = Product.objects.count()
+        low_stock = Product.objects.filter(quantity__lte=models.F('reorder_level')).count()
+        
+        return Response({
+            "total_products": total_products,
+            "low_stock_products": low_stock
+        })
+        
         
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
