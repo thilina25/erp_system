@@ -7,6 +7,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from .models import Order, OrderItem, Invoice
 from .serializers import OrderSerializer, OrderItemSerializer, InvoiceSerializer
+from django.db.models import Sum, Count
+from django.utils.timezone import now
+from datetime import timedelta
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -57,6 +63,16 @@ class OrderViewSet(viewsets.ModelViewSet):
             
             serializer = self.get_serializer(order)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+    @action(detail=False, methods=['get'])
+    def dashboard_summery(self, request):
+        total_orders = Order.objects.count()
+        total_revenue = Order.objects.aaggregate(total=sum('total_amount'))['total'] or 0
+        
+        return Response({
+            "total_orders": total_orders,
+            "total_revenue": total_revenue
+        })
         
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
